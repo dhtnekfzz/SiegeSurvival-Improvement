@@ -12,6 +12,7 @@
 #include "NativeGameplayTags.h"
 #include "Character/SSCharacter.h"
 #include "Net/UnrealNetwork.h"
+#include "Player/SSPlayerState.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(LyraQuickBarComponent)
 
@@ -149,18 +150,15 @@ void ULyraQuickBarComponent::SetActiveSlotIndex_Implementation(int32 NewIndex)
 
 		OnRep_ActiveSlotIndex();
 
-		// SS 
+		// SS: 무기를 바꿨을 때 무기의 경험치와 레벨을 업데이트합니다.
 		TSubclassOf<ULyraInventoryItemDefinition> ItemClass=Slots[NewIndex]->GetItemDef();
 		ULyraInventoryItemDefinition* SlotItemDef = ItemClass->GetDefaultObject<ULyraInventoryItemDefinition>();
 		if (AController* OwnerController = Cast<AController>(GetOwner()))
-		{
-			if (ASSCharacter* Character = Cast<ASSCharacter>(OwnerController->GetPawn()))
+		{   //ASSCharacter* Character = Cast<ASSCharacter>(OwnerController->GetPawn())
+			if (ASSPlayerState* SSPlayerState=OwnerController->GetPlayerState<ASSPlayerState>())
 			{
-				if(Character->WeaponXP.Contains(SlotItemDef->GetWeaponType()))
-				{
-					Character->OnXPChangedDelegate.Broadcast(Character->WeaponXP[SlotItemDef->GetWeaponType()]);
-					Character->OnLevelChangedDelegate.Broadcast(Character->WeaponLevel[SlotItemDef->GetWeaponType()]);
-				}
+				SSPlayerState->OnWeaponXPChangedDelegate.Broadcast(SSPlayerState->GetWeaponXP(SlotItemDef->GetWeaponType()));
+				SSPlayerState->OnWeaponLevelChangedDelegate.Broadcast(SSPlayerState->GetWeaponLevel(SlotItemDef->GetWeaponType()));
 			}
 		}
 	}

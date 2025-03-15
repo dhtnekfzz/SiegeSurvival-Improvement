@@ -186,6 +186,8 @@ void ULyraHealthComponent::HandleOutOfHealth(AActor* DamageInstigator, AActor* D
 		}
 
 		//@TODO: assist messages (could compute from damage dealt elsewhere)?
+
+		
 	}
 
 #endif // #if WITH_SERVER_CODE

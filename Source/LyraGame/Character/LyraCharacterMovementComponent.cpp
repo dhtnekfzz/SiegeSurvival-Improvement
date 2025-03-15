@@ -4,6 +4,7 @@
 
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
+#include "Character/SSCharacter.h"
 #include "Components/CapsuleComponent.h"
 #include "Engine/World.h"
 #include "GameFramework/Character.h"
@@ -127,5 +128,9 @@ float ULyraCharacterMovementComponent::GetMaxSpeed() const
 		}
 	}
 
-	return Super::GetMaxSpeed();
+	// SS: Speed를 Speed Attribute로 대체
+	ASSCharacter* SSCharacter=Cast<ASSCharacter>(GetOwner());
+	
+	return SSCharacter->GetSpeed();
+	
 }

@@ -6,6 +6,7 @@
 #include "MVVMViewModelBase.h"
 #include "MVVM_WeaponXP.generated.h"
 
+class ASSPlayerState;
 class ASSCharacter;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnXPPercentChnaged, float, NewValue);
@@ -18,7 +19,7 @@ class LYRAGAME_API UMVVM_WeaponXP : public UMVVMViewModelBase
 	GENERATED_BODY()
 
 public:
-	void Initialize(ASSCharacter* InCharacter);
+	void Initialize(ASSPlayerState* InPlayerState);
 
 	UPROPERTY(BlueprintAssignable)
 	FOnXPPercentChnaged OnXPPercentChangedDelegate;
@@ -27,13 +28,13 @@ public:
 	int32 WeaponXP;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, FieldNotify, Setter, Getter, meta=(AllowPrivateAccess="ture"))
-	int32 WeaponLevel;
+	int32 WeaponLevel=1;
 
 	UFUNCTION()
-	void OnXPChanged(int32 NewXP);
+	void OnWeaponXPChanged(int32 NewXP);
 
 	UFUNCTION()
-	void OnLevelChanged(int32 NewLevel);
+	void OnWeaponLevelChanged(int32 NewLevel);
 
 	void SetWeaponXP(int32 InXP);
 	void SetWeaponLevel(int32 InLevel);
@@ -42,5 +43,5 @@ public:
 	int32 GetWeaponLevel() const { return WeaponLevel; }
 
 	UPROPERTY()
-	ASSCharacter* Character;
+	ASSPlayerState* SSPlayerState;
 };

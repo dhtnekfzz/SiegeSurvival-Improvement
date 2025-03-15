@@ -13,9 +13,7 @@ void USSProjectileSpell::SpawnProjectile(const FGameplayTag& SocketTag,
 	{
 		const FVector SocketLocation=ICombatInterface::Execute_GetCombatSocketLocation(GetAvatarActorFromActorInfo(), SocketTag);
 		FRotator Rotation=GetAvatarActorFromActorInfo()->GetActorForwardVector().Rotation();
-		DrawDebugSphere(GetWorld(), SocketLocation, 20.f, 10, FColor::Red,  true, 10);
 		
-
 		if(bOverridePitch)
 		{
 			Rotation.Pitch=PitchOverride;

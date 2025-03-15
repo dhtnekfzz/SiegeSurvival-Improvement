@@ -1,14 +1,19 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "LyraHealthSet.h"
+#include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystem/Attributes/LyraAttributeSet.h"
 #include "LyraGameplayTags.h"
 #include "Net/UnrealNetwork.h"
 #include "AbilitySystem/LyraAbilitySystemComponent.h"
 #include "Engine/World.h"
 #include "GameplayEffectExtension.h"
+#include "AbilitySystem/SSAttributeSet.h"
 #include "Messages/LyraVerbMessage.h"
 #include "GameFramework/GameplayMessageSubsystem.h"
+#include "GameModes/LyraGameMode.h"
+#include "Kismet/GameplayStatics.h"
+#include "Public/Character/SSCharacter.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(LyraHealthSet)
 
@@ -168,6 +173,7 @@ void ULyraHealthSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackD
 	}
 	else if (Data.EvaluatedData.Attribute == GetMoveSpeedAttribute())
 	{
+		// SS: Set MoveSpeed
 		SetMoveSpeed(FMath::Clamp(GetMoveSpeed(), 0.0f, 1200.0f));
 	}
 
@@ -188,10 +194,54 @@ void ULyraHealthSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackD
 	if ((GetHealth() <= 0.0f) && !bOutOfHealth)
 	{
 		OnOutOfHealth.Broadcast(Instigator, Causer, &Data.EffectSpec, Data.EvaluatedData.Magnitude, HealthBeforeAttributeChange, GetHealth());
+		SendLevelXPAttribute(Data);
 	}
 
 	// Check health again in case an event above changed it.
 	bOutOfHealth = (GetHealth() <= 0.0f);
+}
+
+// SS: SendLevelXPAttribute
+void ULyraHealthSet::SendLevelXPAttribute(const FGameplayEffectModCallbackData& Data)
+{
+	FGameplayModifierInfo ModifierInfo;
+
+	FGameplayEffectContextHandle EffectContextHandle=Data.EffectSpec.GetContext();
+	
+	UAbilitySystemComponent* SourceASC=EffectContextHandle.GetOriginalInstigatorAbilitySystemComponent();
+	
+	AActor* SourceAvatarActor=SourceASC->AbilityActorInfo->AvatarActor.Get();
+	AController* SourceController=SourceASC->AbilityActorInfo->PlayerController.Get();
+	
+	if(const APawn* Pawn=Cast<APawn>(SourceAvatarActor))
+	{
+		SourceController=Pawn->GetController();
+	}
+	
+	ASSCharacter* SourceCharacter=Cast<ASSCharacter>(SourceController->GetPawn());
+	
+	ASSCharacter* TargetCharacter=Cast<ASSCharacter>(Data.Target.GetAvatarActor());
+	
+	const ALyraGameMode* AuraGameMode=Cast<ALyraGameMode>(UGameplayStatics::GetGameMode(TargetCharacter));
+	if(AuraGameMode==nullptr) return;
+	UCharacterClassInfo* CharacterClassInfo=AuraGameMode->CharacterClassInfo;
+	if(CharacterClassInfo==nullptr) return;
+	
+	const FCharacterClassDefaultInfo Info= CharacterClassInfo->GetDefaultInfo(TargetCharacter->CharacterClass);
+	const float XPReward=Info.XPReward.GetValueAtLevel(1);
+
+	ModifierInfo.ModifierMagnitude = FScalableFloat(XPReward);
+	ModifierInfo.ModifierOp = EGameplayModOp::Additive;
+	ModifierInfo.Attribute =USSAttributeSet::GetIncomingXPAttribute();
+	UGameplayEffect* Effect= NewObject<UGameplayEffect>( GetTransientPackage(), FName(TEXT("PlayerXP")));
+	Effect->Modifiers.Add(ModifierInfo);
+	
+	UAbilitySystemComponent* ASC=UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(SourceCharacter);
+
+	FGameplayEffectContextHandle EffectContext=ASC->MakeEffectContext();
+	EffectContext.AddSourceObject(this);;
+	FGameplayEffectSpec* Spec= new FGameplayEffectSpec(Effect, EffectContext, 1.0f);
+	ASC->ApplyGameplayEffectSpecToSelf(*Spec);
 }
 
 void ULyraHealthSet::PreAttributeBaseChange(const FGameplayAttribute& Attribute, float& NewValue) const

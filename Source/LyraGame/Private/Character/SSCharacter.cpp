@@ -16,6 +16,7 @@
 #include "Camera/LyraCameraComponent.h"
 #include "Character/LyraCharacterMovementComponent.h"
 #include "Character/LyraHealthComponent.h"
+#include "Player/SSPlayerState.h"
 #include "UI/ViewModel/MVVM_WeaponXP.h"
 #include "Weapons/LyraWeaponSpawner.h"
 #include "Weapons/SSWeaponBase.h"
@@ -33,31 +34,7 @@ ASSCharacter::ASSCharacter(const FObjectInitializer& ObjectInitializer)
 	Mesh1p->SetupAttachment(CameraComponent);
 	Mesh1p->SetOnlyOwnerSee(true);
 	Mesh1p->CastShadow = false;
-	Mesh1p->SetOwnerNoSee(true);	
-
-	FWeaponExperience NewWeaponExp;
-	NewWeaponExp.EXPThresholds.Add(0.0f);
-	NewWeaponExp.EXPThresholds.Add(200.0f);
-	NewWeaponExp.EXPThresholds.Add(300.0f);
-	// NewWeaponExp.EXPThresholds.Add(400.0f);
-	WeaponExp.Add(EWeaponType::Pistol, NewWeaponExp);
-
-	WeaponLevel.Add(EWeaponType::Pistol, 1);
-	WeaponXP.Add(EWeaponType::Pistol, 0);
-	/*WeaponXP.Add(EWeaponType::Pistol, 0);
-	WeaponXP.Add(EWeaponType::Rifle, 0);
-	WeaponXP.Add(EWeaponType::Shotgun, 0);
-	
-	WeaponLevel.Add(EWeaponType::Pistol, 1);
-	WeaponLevel.Add(EWeaponType::Rifle, 1);
-	WeaponLevel.Add(EWeaponType::Shotgun, 1);*/
-
-
-	// static ConstructorHelpers::FClassFinder<ULyraInventoryItemDefinition> WeaponItemClass(TEXT("/Script/Engine.Blueprint'/Game/Weapons/Pistol/ID_Pistol_SSLv2.ID_Pistol_SSLv2'"));
-	// if (WeaponItemClass.Succeeded())
-	// {
-	// 	WeaponItemDefinition = WeaponItemClass.Class;
-	// }
+	Mesh1p->SetOwnerNoSee(true);
 	
 }
 
@@ -74,13 +51,11 @@ void ASSCharacter::SetCurrentWeapon(ASSWeaponBase* NewWeapon)
 void ASSCharacter::OnPlayerEquippedNewWeapon(float WeaponOffset)
 {
 	if(!IsValid(GetMesh())) return;
-
 	
 	if (USSAnimInstance* AnimInstance = Cast<USSAnimInstance>(Mesh1p->GetAnimInstance()))
 	{
 		AnimInstance->OnNewWeaponEquipped(WeaponOffset);
 	}
-
 }
 
 void ASSCharacter::SetIsFirstPerson()
@@ -95,26 +70,6 @@ void ASSCharacter::SetIsFirstPerson()
 		Mesh1p->SetOwnerNoSee(true);
 		IsFirstPerson=false;
 	}
-	
-}
-
-void ASSCharacter::CheckLevelUp(EWeaponType WeaponType)
-{
-	if(WeaponExp[WeaponType].WeaponLevel==3) return;
-	// if(!WeaponExp[WeaponType].EXPThresholds[WeaponExp[WeaponType].WeaponLevel]) return;
-
-	if(WeaponExp[WeaponType].CurrentEXP>=WeaponExp[WeaponType].EXPThresholds[WeaponExp[WeaponType].WeaponLevel]
-	&& WeaponExp[WeaponType].WeaponLevel<WeaponExp[WeaponType].EXPThresholds.Num())
-	{
-		WeaponExp[WeaponType].CurrentEXP-=WeaponExp[WeaponType].EXPThresholds[WeaponExp[WeaponType].WeaponLevel];
-		WeaponExp[WeaponType].WeaponLevel++;
-		OnLevelUp(WeaponType, WeaponExp[WeaponType].WeaponLevel);
-		
-		//OnXPChangedDelegate.Broadcast(WeaponExp[WeaponType].CurrentEXP);
-		//OnLevelChangedDelegate.Broadcast(WeaponExp[WeaponType].WeaponLevel);
-		return;
-	}
-	//OnXPChangedDelegate.Broadcast(WeaponExp[WeaponType].CurrentEXP);
 }
 
 void ASSCharacter::OnLevelUp(EWeaponType WeaponType, int32 Level)
@@ -129,31 +84,6 @@ void ASSCharacter::OnLevelUp(EWeaponType WeaponType, int32 Level)
 			break;
 		}
 	}
-}
-
-void ASSCharacter::AddEXP(EWeaponType WeaponType, float EXP)
-{
-	// Add EXP
-	if(WeaponType== EWeaponType::Healing) return;
-	if(WeaponExp.Contains(WeaponType))
-	{
-		WeaponExp[WeaponType].CurrentEXP+=EXP;
-	}
-	else
-	{
-		FWeaponExperience NewWeaponExp;
-		NewWeaponExp.EXPThresholds.Add(0.0f);
-		NewWeaponExp.EXPThresholds.Add(200.0f);
-		NewWeaponExp.EXPThresholds.Add(300.0f);
-		// NewWeaponExp.EXPThresholds.Add(400.0f);
-		WeaponExp.Add(WeaponType, NewWeaponExp);
-	}
-	CheckLevelUp(WeaponType);
-}
-
-float ASSCharacter::GetWeaponExp(EWeaponType WeaponType) const
-{
-	return WeaponExp.Contains(WeaponType) ? WeaponExp[WeaponType].CurrentEXP : 0.0f;
 }
 
 FVector ASSCharacter::GetCombatSocketLocation_Implementation(const FGameplayTag& MontageTag)
@@ -176,43 +106,108 @@ FVector ASSCharacter::GetCombatSocketLocation_Implementation(const FGameplayTag&
 	return FVector();
 }
 
-int32 ASSCharacter::GetLevel_Implementation(EWeaponType WeaponType) const
+int32 ASSCharacter::GetWeaponLevel_Implementation(EWeaponType WeaponType) const
 {
-	return WeaponLevel[WeaponType];
+	ASSPlayerState* SSPlayerState=GetPlayerState<ASSPlayerState>();
+	check(SSPlayerState);
+	return SSPlayerState->GetWeaponLevel(WeaponType);
 }
 
-int32 ASSCharacter::GetXP_Implementation(EWeaponType WeaponType) const
+int32 ASSCharacter::GetWeaponXP_Implementation(EWeaponType WeaponType) const
 {
-	return WeaponXP[WeaponType];
+	ASSPlayerState* SSPlayerState=GetPlayerState<ASSPlayerState>();
+	check(SSPlayerState);
+	return SSPlayerState->GetWeaponXP(WeaponType);
 }
 
 
-int32 ASSCharacter::FindLevelForXP_Implementation(int32 InXP) const
+int32 ASSCharacter::FindWeaponLevelForXP_Implementation(int32 InXP) const
 {
-	return LevelUpInfo->FindLevelForXP(InXP);
+	ASSPlayerState* SSPlayerState=GetPlayerState<ASSPlayerState>();
+	check(SSPlayerState);
+	return SSPlayerState->WeaponLevelUpInfo->FindLevelForXP(InXP);
 }
-void ASSCharacter::AddXP_Implementation(int32 InXP,EWeaponType WeaponType) 
+void ASSCharacter::AddWeaponXP_Implementation(int32 InXP,EWeaponType WeaponType) 
 {
-	WeaponXP[WeaponType]+=InXP;
-	OnXPChangedDelegate.Broadcast(WeaponXP[WeaponType]);
+	ASSPlayerState* SSPlayerState=GetPlayerState<ASSPlayerState>();
+	check(SSPlayerState);
+	SSPlayerState->AddToWeaponXP(InXP,WeaponType);
 }
 
 void ASSCharacter::AddWeaponLevel_Implementation(int32 InLevel, EWeaponType WeaponType)
 {
-	WeaponLevel[WeaponType]+=InLevel;
-	OnLevelChangedDelegate.Broadcast(WeaponLevel[WeaponType]);
+	ASSPlayerState* SSPlayerState=GetPlayerState<ASSPlayerState>();
+	check(SSPlayerState);
+	SSPlayerState->AddToWeaponLevel(InLevel,WeaponType);
 }
 
-void ASSCharacter::ApplyXP(EWeaponType WeaponType)
+int32 ASSCharacter::GetPlayerLevel_Implementation() const
 {
-	if(!WeaponLevel.Contains(WeaponType))
+	ASSPlayerState* SSPlayerState=GetPlayerState<ASSPlayerState>();
+	check(SSPlayerState);
+	return SSPlayerState->GetPlayerLevel();
+}
+
+int32 ASSCharacter::GetPlayerXP_Implementation() const
+{
+	ASSPlayerState* SSPlayerState=GetPlayerState<ASSPlayerState>();
+	check(SSPlayerState);
+	return SSPlayerState->GetPlayerXP();
+}
+
+void ASSCharacter::AddPlayerXP_Implementation(int32 InXP)
+{
+	ASSPlayerState* SSPlayerState=GetPlayerState<ASSPlayerState>();
+	check(SSPlayerState);
+	SSPlayerState->AddToPlayerXP(InXP);
+}
+
+void ASSCharacter::AddPlayerLevel_Implementation(int32 InLevel)
+{
+	ASSPlayerState* SSPlayerState=GetPlayerState<ASSPlayerState>();
+	check(SSPlayerState);
+	SSPlayerState->AddToPlayerLevel(InLevel);
+}
+
+int32 ASSCharacter::FindPlayerLevelForXP_Implementation(int32 InXP) const
+{
+	ASSPlayerState* SSPlayerState=GetPlayerState<ASSPlayerState>();
+	check(SSPlayerState);
+	return SSPlayerState->LevelUpInfo->FindLevelForXP(InXP);
+}
+
+void ASSCharacter::AddStatPoints_Implementation(int32 InStatPoints)
+{
+	ASSPlayerState* SSPlayerState=GetPlayerState<ASSPlayerState>();
+	check(SSPlayerState);
+	SSPlayerState->AddToStatPoints(InStatPoints);
+}
+
+int32 ASSCharacter::GetStatPoints_Implementation() const
+{
+	ASSPlayerState* SSPlayerState=GetPlayerState<ASSPlayerState>();
+	check(SSPlayerState);
+	return SSPlayerState->GetStatPoints();
+}
+
+int32 ASSCharacter::GetStatPointsReward_Implementation(int32 Level) const
+{
+	ASSPlayerState* SSPlayerState=GetPlayerState<ASSPlayerState>();
+	check(SSPlayerState);
+	return SSPlayerState->LevelUpInfo->LevelUpInformation[Level].StatPointAward;
+}
+
+
+void ASSCharacter::SendWeaponXPAttribute(EWeaponType WeaponType)
+{
+	/*if(!WeaponLevel.Contains(WeaponType))
 	{
 		WeaponXP.Add(WeaponType,0);
 		WeaponLevel.Add(WeaponType, 1);
 		OnXPChangedDelegate.Broadcast(WeaponXP[WeaponType]);
 		OnLevelChangedDelegate.Broadcast(WeaponLevel[WeaponType]);
 		return;
-	}
+	}*/
 	FGameplayModifierInfo ModifierInfo;
 	ModifierInfo.ModifierMagnitude = FScalableFloat(100.0f);
 	ModifierInfo.ModifierOp = EGameplayModOp::Additive;
@@ -237,14 +232,4 @@ void ASSCharacter::ApplyXP(EWeaponType WeaponType)
 	EffectContext.AddSourceObject(this);;
 	FGameplayEffectSpec* Spec= new FGameplayEffectSpec(Effect, EffectContext, 1.0f);
 	ASC->ApplyGameplayEffectSpecToSelf(*Spec);
-}
-
-
-void ASSCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-
-	WeaponXPViewModel=NewObject<UMVVM_WeaponXP>(this, WeaponXPViewModelClass);
-	WeaponXPViewModel->Initialize(this);
-	
 }

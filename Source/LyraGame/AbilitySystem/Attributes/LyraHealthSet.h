@@ -39,6 +39,7 @@ public:
 	ATTRIBUTE_ACCESSORS(ULyraHealthSet, MaxHealth);
 	ATTRIBUTE_ACCESSORS(ULyraHealthSet, Healing);
 	ATTRIBUTE_ACCESSORS(ULyraHealthSet, Damage);
+	// SS: Speed Attribute
 	ATTRIBUTE_ACCESSORS(ULyraHealthSet, MoveSpeed)
 
 	// Delegate when health changes due to damage/healing, some information may be missing on the client
@@ -101,4 +102,8 @@ private:
 	// Incoming damage. This is mapped directly to -Health
 	UPROPERTY(BlueprintReadOnly, Category="Lyra|Health", Meta=(HideFromModifiers, AllowPrivateAccess=true))
 	FGameplayAttributeData Damage;
+
+	// SS
+	void SendLevelXPAttribute(const FGameplayEffectModCallbackData& Data);
+
 };

@@ -13,12 +13,12 @@ struct FSSLevelUpInfo
 
 	UPROPERTY(EditDefaultsOnly)
 	int32 LevelUpRequirement=0;
+
+	UPROPERTY(EditDefaultsOnly)
+	int32 StatPointAward=1;
 	
 };
 
-/**
- * 
- */
 
 
 UCLASS()

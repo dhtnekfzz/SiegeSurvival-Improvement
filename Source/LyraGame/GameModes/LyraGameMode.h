@@ -6,6 +6,7 @@
 
 #include "LyraGameMode.generated.h"
 
+class UCharacterClassInfo;
 class AActor;
 class AController;
 class AGameModeBase;
@@ -68,6 +69,10 @@ public:
 
 	// Delegate called on player initialization, described above 
 	FOnLyraGameModePlayerInitialized OnGameModePlayerInitialized;
+
+	// SS: CharacterClassInfo
+	UPROPERTY(EditDefaultsOnly, Category="Character Class Defaults")
+	TObjectPtr<UCharacterClassInfo> CharacterClassInfo;
 
 protected:	
 	void OnExperienceLoaded(const ULyraExperienceDefinition* CurrentExperience);

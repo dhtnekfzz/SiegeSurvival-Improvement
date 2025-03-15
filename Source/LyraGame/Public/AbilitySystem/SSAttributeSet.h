@@ -8,10 +8,6 @@
 #include "AbilitySystem/Attributes/LyraAttributeSet.h"
 #include "SSAttributeSet.generated.h"
 
-/**
- * 
- */
-
 enum class EWeaponType : uint8;
 
 UCLASS()
@@ -25,18 +21,23 @@ public:
 	
 	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
 	
-	UPROPERTY(BlueprintReadOnly, Category = "WeaponExperience")
+	UPROPERTY(BlueprintReadOnly, Category = "XP")
 	FGameplayAttributeData RifleXP;
 	ATTRIBUTE_ACCESSORS(USSAttributeSet, RifleXP)
 
-	UPROPERTY(BlueprintReadOnly, Category = "WeaponExperience")
+	UPROPERTY(BlueprintReadOnly, Category = "XP")
 	FGameplayAttributeData ShotgunXP;
 	ATTRIBUTE_ACCESSORS(USSAttributeSet, ShotgunXP)
 
-	UPROPERTY(BlueprintReadOnly, Category = "WeaponExperience")
+	UPROPERTY(BlueprintReadOnly, Category = "XP")
 	FGameplayAttributeData PistolXP;
 	ATTRIBUTE_ACCESSORS(USSAttributeSet, PistolXP)
 
+	UPROPERTY(BlueprintReadOnly, Category="XP")
+	FGameplayAttributeData IncomingXP;
+	ATTRIBUTE_ACCESSORS(USSAttributeSet, IncomingXP);
+
 private:
 	void HandleIncomingXP(int32 XP, EWeaponType WeaponTyp, const FGameplayEffectModCallbackData& Data);
+	void HandleIncomingPlayerXP(int32 XP, const FGameplayEffectModCallbackData& Data);
 };
