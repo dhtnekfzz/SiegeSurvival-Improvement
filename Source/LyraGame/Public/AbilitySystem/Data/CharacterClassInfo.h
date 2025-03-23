@@ -7,9 +7,7 @@
 #include "GameplayEffect.h"
 #include "CharacterClassInfo.generated.h"
 
-/**
- * 
- */
+
 UENUM(BlueprintType)
 enum class ECharacterClass
 {
@@ -32,9 +30,6 @@ struct FCharacterClassDefaultInfo
 };
 
 
-/**
- * 
- */
 UCLASS()
 class LYRAGAME_API UCharacterClassInfo : public UDataAsset
 {

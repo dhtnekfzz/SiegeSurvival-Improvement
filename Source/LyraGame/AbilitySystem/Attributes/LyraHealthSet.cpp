@@ -194,7 +194,7 @@ void ULyraHealthSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackD
 	if ((GetHealth() <= 0.0f) && !bOutOfHealth)
 	{
 		OnOutOfHealth.Broadcast(Instigator, Causer, &Data.EffectSpec, Data.EvaluatedData.Magnitude, HealthBeforeAttributeChange, GetHealth());
-		SendLevelXPAttribute(Data);
+		SendPlayerXPAttribute(Data);
 	}
 
 	// Check health again in case an event above changed it.
@@ -202,10 +202,9 @@ void ULyraHealthSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackD
 }
 
 // SS: SendLevelXPAttribute
-void ULyraHealthSet::SendLevelXPAttribute(const FGameplayEffectModCallbackData& Data)
+void ULyraHealthSet::SendPlayerXPAttribute(const FGameplayEffectModCallbackData& Data)
 {
 	FGameplayModifierInfo ModifierInfo;
-
 	FGameplayEffectContextHandle EffectContextHandle=Data.EffectSpec.GetContext();
 	
 	UAbilitySystemComponent* SourceASC=EffectContextHandle.GetOriginalInstigatorAbilitySystemComponent();
@@ -219,7 +218,6 @@ void ULyraHealthSet::SendLevelXPAttribute(const FGameplayEffectModCallbackData& 
 	}
 	
 	ASSCharacter* SourceCharacter=Cast<ASSCharacter>(SourceController->GetPawn());
-	
 	ASSCharacter* TargetCharacter=Cast<ASSCharacter>(Data.Target.GetAvatarActor());
 	
 	const ALyraGameMode* AuraGameMode=Cast<ALyraGameMode>(UGameplayStatics::GetGameMode(TargetCharacter));

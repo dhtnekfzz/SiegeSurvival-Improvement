@@ -104,6 +104,6 @@ private:
 	FGameplayAttributeData Damage;
 
 	// SS
-	void SendLevelXPAttribute(const FGameplayEffectModCallbackData& Data);
+	void SendPlayerXPAttribute(const FGameplayEffectModCallbackData& Data);
 
 };

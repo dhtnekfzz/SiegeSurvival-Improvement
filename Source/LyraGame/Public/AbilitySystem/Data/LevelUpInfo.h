@@ -19,8 +19,6 @@ struct FSSLevelUpInfo
 	
 };
 
-
-
 UCLASS()
 class LYRAGAME_API ULevelUpInfo : public UDataAsset
 {
@@ -30,6 +28,5 @@ public:
 	TArray<FSSLevelUpInfo> LevelUpInformation;
 
 	int32 FindLevelForXP(int32 XP) const;
-	
 	
 };

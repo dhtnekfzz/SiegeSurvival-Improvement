@@ -132,14 +132,13 @@ void ALyraWeaponSpawner::AttemptPickUpWeapon_Implementation(APawn* Pawn)
 		if (WeaponItemDefinition != nullptr)
 		{
 			//Attempt to grant the weapon
+			//Weapon picked up by pawn
+			bIsWeaponAvailable = false;
+			SetWeaponPickupVisibility(false);
+			PlayPickupEffects();
+			StartCoolDown();
 			if (GiveWeapon(WeaponItemDefinition, Pawn))
 			{
-				//Weapon picked up by pawn
-				bIsWeaponAvailable = false;
-				SetWeaponPickupVisibility(false);
-				PlayPickupEffects();
-				StartCoolDown();
-
 				// SS: Add XP to the weapon
 				EWeaponType WeaponType=WeaponItemDefinition->GetDefaultObject<ULyraInventoryItemDefinition>()->WeaponType;
 				if(ASSCharacter* SSCharacter = Cast<ASSCharacter>(Pawn))

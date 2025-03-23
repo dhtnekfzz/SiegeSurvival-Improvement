@@ -72,7 +72,6 @@ void USSAttributeSet::HandleIncomingPlayerXP(int32 XP, const FGameplayEffectModC
 
 void USSAttributeSet::HandleIncomingXP(int32 XP, EWeaponType WeaponType, const FGameplayEffectModCallbackData& Data)
 {
-
 	ASSCharacter* AvatarActor=Cast<ASSCharacter>(Data.Target.GetAvatarActor());
 	
 	const int32 CurrentLevel=ICombatInterface::Execute_GetWeaponLevel(AvatarActor, WeaponType);

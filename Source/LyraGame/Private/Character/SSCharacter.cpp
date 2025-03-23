@@ -200,14 +200,6 @@ int32 ASSCharacter::GetStatPointsReward_Implementation(int32 Level) const
 
 void ASSCharacter::SendWeaponXPAttribute(EWeaponType WeaponType)
 {
-	/*if(!WeaponLevel.Contains(WeaponType))
-	{
-		WeaponXP.Add(WeaponType,0);
-		WeaponLevel.Add(WeaponType, 1);
-		OnXPChangedDelegate.Broadcast(WeaponXP[WeaponType]);
-		OnLevelChangedDelegate.Broadcast(WeaponLevel[WeaponType]);
-		return;
-	}*/
 	FGameplayModifierInfo ModifierInfo;
 	ModifierInfo.ModifierMagnitude = FScalableFloat(100.0f);
 	ModifierInfo.ModifierOp = EGameplayModOp::Additive;

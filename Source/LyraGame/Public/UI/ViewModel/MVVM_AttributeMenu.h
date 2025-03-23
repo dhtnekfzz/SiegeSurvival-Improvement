@@ -25,7 +25,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, FieldNotify, Setter, Getter, meta=(AllowPrivateAccess="ture"))
 	int32 StatPoints;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, FieldNotify, Setter, Getter, meta=(AllowPrivateAccess="ture"))
 	int32 DamageStat;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, FieldNotify, Setter, Getter, meta=(AllowPrivateAccess="ture"))
@@ -48,11 +47,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void UpgradeStat(FString AttributeName);
-
 	
 	UPROPERTY()
 	ASSPlayerState* SSPlayerState;
-	
 };
 
 

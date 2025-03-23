@@ -36,32 +36,12 @@ public:
 	TSubclassOf<ULyraInventoryItemDefinition> WeaponItemClass;
 };
 
-USTRUCT(BlueprintType)
-struct FWeaponExperience : public FTableRowBase
-{
-	GENERATED_BODY()
-
-public:
-	// 현재 경험치
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon|Level")
-	float CurrentEXP = 0.0f;
-
-	// 현재 레벨
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon|Level")
-	int32 WeaponLevel = 1;
-
-	// 레벨업에 필요한 경험치 임계값
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon|Level")
-	TArray<float> EXPThresholds;
-};
-
 UCLASS()
 class LYRAGAME_API ASSCharacter : public ALyraCharacter, public ICombatInterface
 {
 	GENERATED_BODY()
 	
 public:
-	
 	ASSCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	
 	UFUNCTION(BlueprintCallable, Category = "SS|Character")
@@ -107,20 +87,15 @@ public:
 	virtual void AddStatPoints_Implementation(int32 InStatPoints) override;
 	virtual int32 GetStatPoints_Implementation() const override;
 	virtual int32 GetStatPointsReward_Implementation(int32 Level) const override;
-	
 	/* end Combat Interface */
 
 	void SendWeaponXPAttribute(EWeaponType WeaponType);
-	
-	//Weapon
+
 	UPROPERTY()
 	class ASSWeaponBase* CurrentWeapon;
 
 	UPROPERTY(BlueprintReadOnly, Category = "SS|Character")
 	bool IsFirstPerson = false;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon|Level")
-	TMap<EWeaponType, FWeaponExperience> WeaponExp;
 
 	UPROPERTY(EditAnywhere,  Category="Weapon|Level")
 	TSubclassOf<ULyraInventoryItemDefinition> WeaponItemDefinition;

@@ -21,8 +21,6 @@ ASSPlayerState::ASSPlayerState()
 	WeaponLevel[EWeaponType::Pistol]=1;
 	WeaponLevel[EWeaponType::Rifle]=1;
 	WeaponLevel[EWeaponType::Shotgun]=1;
-
-	
 	
 }
 
